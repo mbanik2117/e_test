@@ -49,7 +49,6 @@ def subject_list(request):
     context = {'subjects': subjects, 'exams': exams}
     return render(request, 'subject_list.html', context)
 
-@cache_page(60 * 30) 
 @login_required
 def subject_tests(request, subject_name, test_id):
     subject = get_object_or_404(Subject, name=subject_name)
@@ -70,12 +69,23 @@ def subject_tests(request, subject_name, test_id):
         if request.method == 'POST':
             for question in questions:
                 selected_option = request.POST.get(f'answer_{question.id}')
-                UserAnswer.objects.create(
-                    test_attempt=test_attempt,
-                    question=question,
-                    selected_option=selected_option,
-                    user_profile=user_profile
-                )
+                
+                # Check if an answer was provided for the question
+                if selected_option is not None:
+                    UserAnswer.objects.create(
+                        test_attempt=test_attempt,
+                        question=question,
+                        selected_option=selected_option,
+                        user_profile=user_profile
+                    )
+                else:
+                    # If no answer provided, assign a score of zero for that question
+                    UserAnswer.objects.create(
+                        test_attempt=test_attempt,
+                        question=question,
+                        selected_option=None,
+                        user_profile=user_profile
+                    )
 
             test_attempt.end_time = dt.now()
             test_attempt.save()
@@ -95,6 +105,7 @@ def subject_tests(request, subject_name, test_id):
         'test_attempt': test_attempt,
     }
     return render(request, 'subject_test.html', context)
+
 
 
 @cache_page(60 * 30) 
