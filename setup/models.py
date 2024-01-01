@@ -52,10 +52,9 @@ class TestAttempt(models.Model):
 class UserAnswer(models.Model):
     test_attempt = models.ForeignKey(TestAttempt, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    selected_option = models.CharField(max_length=1)
+    selected_option = models.CharField(max_length=1, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)  # Add a timestamp for each answer
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"UserAnswer - {self.id} - {self.user_profile}"
-# ... existing code ...
