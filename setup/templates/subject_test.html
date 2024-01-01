@@ -33,46 +33,60 @@
 
     <script>
         const testDuration = 1;  // Replace with actual test duration in minutes
-        let timer = testDuration * 60;  // Convert to seconds
+    let timer = testDuration * 60;  // Convert to seconds
 
-        function startTimer() {
-            const timerElement = document.getElementById('timer');
-            const submitButton = document.getElementById('submit-button');
-            const testForm = document.getElementById('test-form');
+    function startTimer() {
+        const timerElement = document.getElementById('timer');
+        const submitButton = document.getElementById('submit-button');
+        const testForm = document.getElementById('test-form');
 
-            const intervalId = setInterval(() => {
-                timerElement.textContent = `Time Remaining: ${timer} seconds`;
-                timer--;
+        const intervalId = setInterval(() => {
+            timerElement.textContent = `Time Remaining: ${timer} seconds`;
+            timer--;
 
-                // Disable all buttons except "Submit Test" if the timer is running
-                const buttonsToDisable = document.querySelectorAll('button:not(#submit-button)');
-                buttonsToDisable.forEach(button => {
-                    button.disabled = timer > 0;
-                });
+            // Disable all buttons except "Submit Test" if the timer is running
+            const buttonsToDisable = document.querySelectorAll('button:not(#submit-button)');
+            buttonsToDisable.forEach(button => {
+                button.disabled = timer > 0;
+            });
 
-                // Disable browser navigation buttons
-                window.onbeforeunload = function() {
-                    return "Leaving this page will end your test. Are you sure?";
-                };
+            // Disable browser navigation buttons
+            window.onbeforeunload = function () {
+                return "Leaving this page will end your test. Are you sure?";
+            };
 
-                // Auto-submit the test and display results when the timer hits zero
-                if (timer <= 0) {
-                    clearInterval(intervalId);
-                    timerElement.textContent = 'Time is up! Submitting the test...';
-                    submitButton.disabled = true;
-                    window.onbeforeunload = null;
-
-                    // Simulate form submission (replace with actual form submission logic)
-                    setTimeout(() => {
-                        testForm.submit();
-                        // You can replace the above line with logic to display results.
-                        // For simplicity, we'll just log a message here.
-                        console.log('Test submitted, display results logic here.');
-                    }, 1000);
+            // Check if any question is unanswered
+            let unansweredQuestion = false;
+            document.querySelectorAll('[id^=question-]').forEach(questionDiv => {
+                const questionId = questionDiv.id.split('-')[1];
+                const selectedOption = document.querySelector(`input[name="answer_${questionId}"]:checked`);
+                if (!selectedOption) {
+                    unansweredQuestion = true;
                 }
-            }, 1000);
-        }
+            });
 
-        window.onload = startTimer;
+            // Auto-submit the test and display results when the timer hits zero
+            if (timer <= 0 || unansweredQuestion) {
+                clearInterval(intervalId);
+                timerElement.textContent = 'Time is up! Submitting the test...';
+                submitButton.disabled = true;
+                window.onbeforeunload = null;
+
+                // Simulate form submission (replace with actual form submission logic)
+                setTimeout(() => {
+                    if (unansweredQuestion) {
+                        // Handle unanswered questions here, e.g., set score to zero
+                        console.log('Some questions are unanswered. Setting score to zero.');
+                    }
+                    testForm.submit();
+                    // You can replace the above line with logic to display results.
+                    // For simplicity, we'll just log a message here.
+                    console.log('Test submitted, display results logic here.');
+                }, 1000);
+            }
+        }, 1000);
+    }
+
+    window.onload = startTimer;
     </script>
 {% endblock %}
